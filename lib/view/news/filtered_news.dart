@@ -3,15 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:news_and_weather/models/news_model.dart';
 import 'package:news_and_weather/provider/future_provider.dart';
 import 'package:news_and_weather/provider/news_choice_provider.dart';
-import 'package:news_and_weather/services/common_services.dart';
+import 'package:news_and_weather/responsive_layout/responsive_view.dart';
+import 'package:news_and_weather/view/news/news_responsive_view/news_mobile_view.dart';
+import 'package:news_and_weather/view/news/news_responsive_view/news_tab_view.dart';
 
 class FilteredNews extends ConsumerWidget {
   const FilteredNews({
     super.key,
   });
-
-  final String placeHolderImage =
-      "https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png";
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,50 +25,13 @@ class FilteredNews extends ConsumerWidget {
           itemCount: news.articles?.length ?? 0,
           itemBuilder: (context, index) {
             final currentNews = news.articles![index];
-            return GestureDetector(
-              onTap: () =>
-                  CommonServices.openWebPage(Uri.parse(currentNews.url ?? "")),
-              child: Card(
-                margin: const EdgeInsets.all(8.0),
-                elevation: 4.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.0),
+            return ResponsiveView(
+                tab: NewsTabView(
+                  currentNews: currentNews,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Image.network(
-                      currentNews.urlToImage ?? placeHolderImage,
-                      height: 150,
-                      fit: BoxFit.cover,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            currentNews.title ?? "",
-                            style: const TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            currentNews.description ?? "",
-                            style: TextStyle(
-                              fontSize: 15.0,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                          const SizedBox(height: 8.0),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
+                mobile: NewsMobileView(
+                  currentNews: currentNews,
+                ));
           },
         );
       },

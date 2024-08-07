@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:news_and_weather/models/news_model.dart';
 import 'package:news_and_weather/provider/future_provider.dart';
+import 'package:news_and_weather/responsive_layout/responsive_view.dart';
 import 'package:news_and_weather/services/common_services.dart';
+import 'package:news_and_weather/view/news/news_responsive_view/news_mobile_view.dart';
+import 'package:news_and_weather/view/news/news_responsive_view/news_tab_view.dart';
 
 class NewsView extends ConsumerWidget {
   const NewsView({
@@ -25,57 +28,26 @@ class NewsView extends ConsumerWidget {
 
     return categoryNewsData.when(
       data: (NewsModel news) {
-        return ListView.builder(
-          shrinkWrap: true,
-          itemCount: news.articles?.length ?? 0,
-          itemBuilder: (context, index) {
-            final currentNews = news.articles![index];
-            return GestureDetector(
-              onTap: () =>
-                  CommonServices.openWebPage(Uri.parse(currentNews.url ?? "")),
-              child: Card(
-                margin: const EdgeInsets.all(8.0),
-                elevation: 4.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.0),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Image.network(
-                      currentNews.urlToImage ?? placeHolderImage,
-                      height: 150,
-                      fit: BoxFit.cover,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            currentNews.title ?? "",
-                            style: const TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            currentNews.description ?? "",
-                            style: TextStyle(
-                              fontSize: 15.0,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                          const SizedBox(height: 8.0),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
+        return news.articles != null && news.articles!.isNotEmpty
+            ? ListView.builder(
+                shrinkWrap: true,
+                itemCount: news.articles?.length ?? 0,
+                itemBuilder: (context, index) {
+                  final currentNews = news.articles![index];
+                  return GestureDetector(
+                    onTap: () => CommonServices.openWebPage(
+                        Uri.parse(currentNews.url ?? "")),
+                    child: ResponsiveView(
+                        tab: NewsTabView(
+                          currentNews: currentNews,
+                        ),
+                        mobile: NewsMobileView(
+                          currentNews: currentNews,
+                        )),
+                  );
+                },
+              )
+            : const Center(child: Text("No News for this climate"));
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(child: Text('Error: $error')),

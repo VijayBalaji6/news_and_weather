@@ -16,69 +16,70 @@ class ForecastWeatherView extends ConsumerWidget {
     final bool isCelsiusScale =
         ref.watch(temperatureScaleState) == TemperatureState.celsius;
 
-    switch (forecastAsyncData) {
-      case AsyncError(:final error):
-        return Center(child: Text('Error: $error'));
-
-      case AsyncData(:final ForeCastModel value):
+    return forecastAsyncData.when(
+      data: (ForeCastModel value) {
         return Padding(
           padding: const EdgeInsets.all(16.0),
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: value.list.length,
-            itemBuilder: (context, index) {
-              final element = value.list[index].main;
-              return Column(
-                children: [
-                  Center(
-                    child: Text(
-                      DateFormat('yyyy-MM-dd h:mm a').format(
-                          DateTime.fromMillisecondsSinceEpoch(
-                              value.list[index].dt * 1000)),
-                      style: const TextStyle(
-                          fontSize: 32, fontWeight: FontWeight.bold),
+          child: Scrollbar(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: value.list.length,
+              itemBuilder: (context, index) {
+                final element = value.list[index].main;
+                final wind = value.list[index].wind;
+                return Column(
+                  children: [
+                    Center(
+                      child: Text(
+                        DateFormat('yyyy-MM-dd h:mm a').format(
+                            DateTime.fromMillisecondsSinceEpoch(
+                                value.list[index].dt * 1000)),
+                        style: const TextStyle(
+                            fontSize: 32, fontWeight: FontWeight.bold),
+                      ),
                     ),
-                  ),
-                  GridView(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 8.0,
-                      mainAxisSpacing: 8.0,
-                      childAspectRatio: 1,
+                    GridView(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 8.0,
+                        mainAxisSpacing: 8.0,
+                        childAspectRatio: 1,
+                      ),
+                      children: [
+                        _buildDetail(
+                            'Feels Like',
+                            CommonServices.convertKelvinToTemp(
+                                kelvin: element.tempMax,
+                                toCelsius: isCelsiusScale)),
+                        _buildDetail(
+                            'Min Temp',
+                            CommonServices.convertKelvinToTemp(
+                                kelvin: element.tempMax,
+                                toCelsius: isCelsiusScale)),
+                        _buildDetail(
+                            'Max Temp',
+                            CommonServices.convertKelvinToTemp(
+                                kelvin: element.tempMax,
+                                toCelsius: isCelsiusScale)),
+                        _buildDetail('Pressure', '${element.pressure} hPa'),
+                        _buildDetail('Humidity', '${element.humidity}%'),
+                        _buildDetail('Wind Speed', '${wind.speed} km/s'),
+                        _buildDetail('Wind Gust', '${wind.gust} km/s'),
+                      ],
                     ),
-                    children: [
-                      _buildDetail(
-                          'Feels Like',
-                          CommonServices.convertKelvinToTemp(
-                              kelvin: element.tempMax,
-                              toCelsius: isCelsiusScale)),
-                      _buildDetail(
-                          'Min Temp',
-                          CommonServices.convertKelvinToTemp(
-                              kelvin: element.tempMax,
-                              toCelsius: isCelsiusScale)),
-                      _buildDetail(
-                          'Max Temp',
-                          CommonServices.convertKelvinToTemp(
-                              kelvin: element.tempMax,
-                              toCelsius: isCelsiusScale)),
-                      _buildDetail('Pressure', '${element.pressure} hPa'),
-                      _buildDetail('Humidity', '${element.humidity}%'),
-                      _buildDetail('Wind Speed', '${element.humidity} m/s'),
-                      _buildDetail('Wind Gust', '${element.humidity} m/s'),
-                    ],
-                  ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
           ),
         );
-      default:
-        return const Center(child: CircularProgressIndicator());
-    }
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stackTrace) => Center(child: Text('Error: $error')),
+    );
   }
 }
 

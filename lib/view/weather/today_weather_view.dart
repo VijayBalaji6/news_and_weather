@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:news_and_weather/models/weather/weather_model.dart';
 import 'package:news_and_weather/provider/app_state_provider.dart';
-import 'package:news_and_weather/provider/future_provider.dart';
+import 'package:news_and_weather/provider/weather_data_provider.dart';
 import 'package:news_and_weather/services/common_services.dart';
 
 class WeatherView extends ConsumerWidget {
@@ -12,39 +12,44 @@ class WeatherView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<WeatherModel> weatherAsyncData =
-        ref.watch(weatherDataProvider);
+    final weatherAsyncData = ref.watch(todayWeatherProvider);
     final bool isCelsiusScale =
         ref.watch(temperatureScaleState) == TemperatureState.celsius;
 
-    switch (weatherAsyncData) {
-      case AsyncError(:final error):
-        return Center(child: Text('Error: $error'));
-      case AsyncData(:final WeatherModel value):
-        return SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Text(
-                    value.name ?? "",
-                    style: const TextStyle(
-                        fontSize: 32, fontWeight: FontWeight.bold),
-                  ),
+    return RefreshIndicator.adaptive(
+      onRefresh: () async {
+        ref.read(todayWeatherProvider.notifier).refresh();
+      },
+      child: weatherAsyncData.when(
+        data: (WeatherModel value) {
+          return Scrollbar(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Text(
+                        value.name ?? "",
+                        style: const TextStyle(
+                            fontSize: 32, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildWeatherCard(value, isCelsiusScale),
+                    const SizedBox(height: 20),
+                    _buildDetailsCard(value, isCelsiusScale),
+                  ],
                 ),
-                const SizedBox(height: 20),
-                _buildWeatherCard(value, isCelsiusScale),
-                const SizedBox(height: 20),
-                _buildDetailsCard(value, isCelsiusScale),
-              ],
+              ),
             ),
-          ),
-        );
-      default:
-        return const Center(child: CircularProgressIndicator());
-    }
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(child: Text('Error: $error')),
+      ),
+    );
   }
 
   Widget _buildWeatherCard(WeatherModel weather, bool isCelsiusScale) {

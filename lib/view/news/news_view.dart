@@ -16,9 +16,11 @@ class NewsView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final weatherState = ref.watch(forecastDataProvider);
 
-    final AsyncValue<NewsModel> categoryNewsData = ref.watch(
-        filteredNewsDataProvider(weatherState.value!.list[0].main.temp > 255
-            ? 'happiness'
+    final AsyncValue<NewsModel> categoryNewsData =
+        ref.watch(filteredNewsDataProvider(weatherState.value != null
+            ? weatherState.value!.list[0].main.temp > 255
+                ? 'happiness'
+                : 'none'
             : 'none'));
 
     return categoryNewsData.when(

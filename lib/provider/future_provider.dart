@@ -5,6 +5,7 @@ import 'package:news_and_weather/models/weather/weather_model.dart';
 import 'package:news_and_weather/services/news_api_services.dart';
 import 'package:news_and_weather/services/weather_api_services.dart';
 
+
 final AutoDisposeFutureProvider<WeatherModel> weatherDataProvider =
     FutureProvider.autoDispose<WeatherModel>((
   ref,

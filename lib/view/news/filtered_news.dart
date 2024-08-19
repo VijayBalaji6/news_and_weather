@@ -17,7 +17,7 @@ class FilteredNews extends ConsumerWidget {
     final String category = ref.watch(newsChoiceProvider);
 
     final AsyncValue<NewsModel> filteredNewsData =
-        ref.watch(filteredNewsDataProvider(category));
+        ref.watch(categoryNewsDataProvider(category));
     return filteredNewsData.when(
       data: (NewsModel news) {
         return ListView.builder(

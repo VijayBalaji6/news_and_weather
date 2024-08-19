@@ -20,8 +20,8 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(backgroundColor: Colors.teal, actions: [
         IconButton(
           icon: const Icon(Icons.settings),
-          onPressed: () => Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => SettingsScreen())),
+          onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const SettingsScreen())),
         ),
       ]),
       body: screens[currentSelectedNavScreen],
